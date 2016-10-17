@@ -34,6 +34,30 @@ class Order(models.Model):
 
     def __str__(self):
         return "PO: %d" % int(self.numPO)
+    
+    def save(self, *args, **kwargs):
+        if self.id:
+            new_order = False
+            old = Order.objects.get(pk=self.id)
+        else:
+            new_order = True
+        super(Order, self).save(*args, **kwargs)
+        # If it's a new order, start an event history
+        if new_order:
+            e = Event.objects.create(
+                order=self,
+                event_date=self.order_date,
+                event_description="Order submitted"
+            )
+        else:
+            # If changing original order date, then
+            # update the first event in the history
+            # to match the new date
+            if old.order_date != self.order_date:
+                e = Event.objects.filter(
+                    order__id=self.id).order_by('event_date')[0]
+                e.event_date = self.order_date
+                e.save()
 
     class Meta:
         ordering = ('order_date',)
@@ -55,7 +79,8 @@ class Event(models.Model):
     event_description = models.TextField(max_length=255)
 
     def __str__(self):
-        return self.event_description
+        return "Order: %s -- %s -- Date: %s" % \
+               (self.order.numPO, self.event_description, self.event_date)
 
 
 class Manufacturer(models.Model):
