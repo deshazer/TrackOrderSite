@@ -17,7 +17,7 @@ class Product(models.Model):
 
 
 class Order(models.Model):
-    isOpen = models.BooleanField()  # Mark order as Open/Closed
+    isOpen = models.BooleanField(default=True)  # Mark order as Open/Closed
     order_date = models.DateTimeField('date submitted')
     numPO = models.IntegerField(unique=True, default=0,
                                 verbose_name="PO Number")   # Purchase Order number
@@ -31,7 +31,7 @@ class Order(models.Model):
             return "closed"
 
     def __str__(self):
-        return "PO: %08d is %s" % (int(self.numPO), self.get_status())
+        return "PO: %08d" % int(self.numPO)
 
     class Meta:
         ordering = ('order_date',)
@@ -42,17 +42,27 @@ class LineItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return "Item: %s x%d on PO: %d" % \
+            (self.product.name, int(self.qty), int(self.order.numPO))
+
 
 class Event(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     event_date = models.DateTimeField()
     event_description = models.TextField(max_length=255)
 
+    def __str__(self):
+        return self.event_description
+
 
 class Manufacturer(models.Model):
     name = models.CharField(max_length=50)
     address = models.TextField(max_length=255)
     phone = models.CharField(max_length=30)
+
+    def __str__(self):
+        return self.name
 
 
 class Person(models.Model):
@@ -61,3 +71,6 @@ class Person(models.Model):
     address = models.TextField(max_length=255)
     phone = models.CharField(max_length=30)
     employer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.first_name + " " + self.last_name
