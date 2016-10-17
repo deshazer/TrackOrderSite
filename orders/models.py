@@ -4,8 +4,9 @@ from django.db import models
 # Create your models here.
 class Product(models.Model):
     name = models.CharField(max_length=50)
-    prod_description = models.CharField(max_length=255)
-    sku = models.IntegerField()
+    prod_description = models.CharField(
+        max_length=255, verbose_name='Product Description')
+    sku = models.IntegerField(verbose_name='SKU')
     unit_price = models.FloatField(default=0.0)
     manufacturer = models.ForeignKey('Manufacturer', null=True, on_delete=models.SET_NULL)
 
@@ -17,8 +18,9 @@ class Product(models.Model):
 
 
 class Order(models.Model):
-    isOpen = models.BooleanField(default=True)  # Mark order as Open/Closed
-    order_date = models.DateTimeField('date submitted')
+    isOpen = models.BooleanField(
+        default=True, verbose_name="Open?")  # Mark order as Open/Closed
+    order_date = models.DateTimeField('Date Submitted')
     numPO = models.IntegerField(unique=True, default=0,
                                 verbose_name="PO Number")   # Purchase Order number
     # Each order may contain multiple products w/ a quantity
@@ -31,7 +33,7 @@ class Order(models.Model):
             return "closed"
 
     def __str__(self):
-        return "PO: %08d" % int(self.numPO)
+        return "PO: %d" % int(self.numPO)
 
     class Meta:
         ordering = ('order_date',)
@@ -43,8 +45,8 @@ class LineItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "Item: %s x%d on PO: %d" % \
-            (self.product.name, int(self.qty), int(self.order.numPO))
+        return "%dx -- %s -- PO: %d" % \
+            (int(self.qty), self.product.name,  int(self.order.numPO))
 
 
 class Event(models.Model):
