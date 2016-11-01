@@ -5,6 +5,13 @@
     <title>Orders</title>
 </head>
 <body>
-    <p>Hello, world. This is the orders index.</p>
+{% if order_list %}
+    <h1>Recently Submitted Orders</h1>
+    {% for order in order_list %}
+        <h3>PO: {{ order.numPO }} -- Submitted on: {{ order.order_date }}</h3>
+    {% endfor %}
+{% else %}
+    <h2>No orders to show...</h2>
+{% endif %}
 </body>
 </html>
