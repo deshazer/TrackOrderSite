@@ -36,13 +36,14 @@ class Order(models.Model):
         return "PO: %d" % int(self.numPO)
 
     class Meta:
-        ordering = ('order_date',)
+        ordering = ('-order_date',)
 
 
 class LineItem(models.Model):
-    qty = models.IntegerField()
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    qty = models.IntegerField()
+
 
     def __str__(self):
         return "%dx -- %s -- PO: %d" % \
